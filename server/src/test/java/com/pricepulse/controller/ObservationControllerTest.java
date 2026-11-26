@@ -12,6 +12,7 @@ import com.pricepulse.model.ObservationStatus;
 import com.pricepulse.model.Verdict;
 import com.pricepulse.repository.DiscountVerdictRepository;
 import com.pricepulse.service.DiscountAnalysisService;
+import com.pricepulse.service.WatchlistService;
 import com.pricepulse.model.PriceObservation;
 import com.pricepulse.model.Product;
 import com.pricepulse.model.Role;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,6 +63,7 @@ class ObservationControllerTest {
     @Mock private PriceObservationRepository observationRepository;
     @Mock private DiscountVerdictRepository verdictRepository;
     @Mock private DiscountAnalysisService discountAnalysisService;
+    @Mock private WatchlistService watchlistService;
 
     private ObservationController controller;
     private final AuthenticatedUser caller = new AuthenticatedUser(1L, "sara@mail.pk", Role.SHOPPER);
@@ -71,7 +74,7 @@ class ObservationControllerTest {
     @BeforeEach
     void setUp() {
         controller = new ObservationController(userRepository, storeRepository, productRepository,
-                observationRepository, verdictRepository, discountAnalysisService, TestRules.defaults());
+                observationRepository, verdictRepository, discountAnalysisService, watchlistService, TestRules.defaults());
         sara = TestUsers.shopper(1L, "sara@mail.pk");
         daraz = new Store("Daraz", "daraz.pk", "PKR", true);
         watch = new Product(daraz, "123", "Smart Watch X2", DARAZ_URL, null);
@@ -100,6 +103,17 @@ class ObservationControllerTest {
         ObservationResponse flagged = controller.submit(caller, request("599", null));
         assertThat(flagged.verdict().verdict()).isEqualTo(Verdict.NOT_ENOUGH_DATA); // no earlier verdict exists
         verify(discountAnalysisService, org.mockito.Mockito.times(1)).analyse(any());
+    }
+
+    @Test
+    void alertsAreCheckedWithThePreviousPriceOnlyForAcceptedPrices() {
+        lastAcceptedPriceIs("6000");
+        controller.submit(caller, request("5000", null));               // -16.7%: accepted
+        verify(watchlistService).checkAlerts(eq(watch), argThat(p -> p.compareTo(new BigDecimal("6000")) == 0),
+                argThat(p -> p.compareTo(new BigDecimal("5000")) == 0));
+
+        controller.submit(caller, request("100", null));                // -98%: flagged, no alerts
+        verify(watchlistService, org.mockito.Mockito.times(1)).checkAlerts(any(), any(), any());
     }
 
     private ObservationRequest request(String price, String claimed) {

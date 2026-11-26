@@ -20,6 +20,7 @@ import com.pricepulse.repository.UserRepository;
 import com.pricepulse.rules.RuleConfig;
 import com.pricepulse.security.AuthenticatedUser;
 import com.pricepulse.service.DiscountAnalysisService;
+import com.pricepulse.service.WatchlistService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,18 +57,21 @@ public class ObservationController {
     private final PriceObservationRepository observationRepository;
     private final DiscountVerdictRepository verdictRepository;
     private final DiscountAnalysisService discountAnalysisService;
+    private final WatchlistService watchlistService;
     private final RuleConfig rules;
 
     public ObservationController(UserRepository userRepository, StoreRepository storeRepository,
                                  ProductRepository productRepository, PriceObservationRepository observationRepository,
                                  DiscountVerdictRepository verdictRepository,
-                                 DiscountAnalysisService discountAnalysisService, RuleConfig rules) {
+                                 DiscountAnalysisService discountAnalysisService, WatchlistService watchlistService,
+                                 RuleConfig rules) {
         this.userRepository = userRepository;
         this.storeRepository = storeRepository;
         this.productRepository = productRepository;
         this.observationRepository = observationRepository;
         this.verdictRepository = verdictRepository;
         this.discountAnalysisService = discountAnalysisService;
+        this.watchlistService = watchlistService;
         this.rules = rules;
     }
 
@@ -163,6 +167,9 @@ public class ObservationController {
         if (saved.isAccepted()) {
             verdict = VerdictResponse.from(discountAnalysisService.analyse(saved));
             message = "Price recorded";
+            // 10. Watchlist alerts for everyone watching this product (FR-28, FR-29)
+            BigDecimal previousPrice = lastAccepted.map(PriceObservation::getPrice).orElse(null);
+            watchlistService.checkAlerts(product, previousPrice, saved.getPrice());
         } else {
             verdict = latestVerdict(product);
             message = "This price changed by more than " + rules.flagChangePercent() + "% and is held for review";
