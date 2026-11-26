@@ -27,7 +27,7 @@ Java 17, Spring Boot, MySQL 8, HTML/CSS/JavaScript with Bootstrap, Chrome Extens
 ## How to install and run
 (To be completed as the project is built.)
 1. Create the MySQL database using `database/schema.sql` and `database/seed.sql`.
-2. Copy `server/src/main/resources/application-example.properties` to `application-local.properties` and fill in your own values. Never commit this file.
+2. Copy `server/src/main/resources/application-example.properties` to `application-local.properties` (same folder) and fill in your own values. Never commit this file.
 3. Run the server from `server/` and open the dashboard.
 4. In Chrome open `chrome://extensions`, enable Developer mode, choose "Load unpacked" and select the `extension/` folder.
 
