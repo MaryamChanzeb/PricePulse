@@ -11,6 +11,6 @@ public final class TestRules {
     }
 
     public static RuleConfig defaults() {
-        return new RuleConfig(60, 6, new BigDecimal("10000000"), 3, 7, 60, 10, 15, 14, 30, 5, 80, 30, 20);
+        return new RuleConfig(60, 6, new BigDecimal("10000000"), 3, 7, 60, 10, 15, 14, 30, 5, 80, 30, 20, 20);
     }
 }

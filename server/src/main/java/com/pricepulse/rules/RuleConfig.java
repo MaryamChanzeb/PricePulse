@@ -25,5 +25,6 @@ public record RuleConfig(
         int perpetualMinObservations,   // FR-18: 5
         int perpetualRatioPercent,      // FR-18: 80
         int medianDays,                 // FR-21: 30
-        int watchlistLimit) {           // FR-26: 20
+        int watchlistLimit,             // FR-26: 20
+        int alertDropPercent) {         // SDS Figure 4: 20
 }
