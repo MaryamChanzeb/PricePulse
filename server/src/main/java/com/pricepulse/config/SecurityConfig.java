@@ -5,6 +5,7 @@ import com.pricepulse.exception.ErrorResponse;
 import com.pricepulse.exception.RoleAccessDeniedException;
 import com.pricepulse.security.JwtAuthenticationFilter;
 import com.pricepulse.security.JwtService;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,6 +52,9 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable())
                 .authorizeHttpRequests(rules -> rules
+                        // The live stream (SSE) finishes in a second, internal "async" step of the SAME request,
+                        // which was already checked; error pages are also internal. Let those steps through.
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").hasRole("SHOPPER")
