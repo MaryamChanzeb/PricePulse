@@ -1,0 +1,18 @@
+/* Demo Store - a fake shop for the class demonstration only. Not a real store. */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #212121; background: #F5F5F5; }
+.demo-banner { background: #374151; color: #FFFFFF; text-align: center; padding: 6px 10px; font-size: 13px; }
+.shop-header { background: #4F46E5; color: #FFFFFF; padding: 14px 20px; font-size: 22px; font-weight: 700; }
+.shop-header a { color: #FFFFFF; text-decoration: none; }
+.product { max-width: 960px; margin: 20px auto; background: #FFFFFF; padding: 20px; display: flex; gap: 24px; flex-wrap: wrap; }
+.product-image { width: 300px; max-width: 100%; height: 300px; background: #E5E7EB; display: flex; align-items: center;
+  justify-content: center; color: #6B7280; font-size: 15px; border-radius: 6px; }
+.product-info { flex: 1; min-width: 260px; }
+.product-title { font-size: 22px; margin: 0 0 16px; font-weight: 600; }
+.price-box { margin: 10px 0 18px; }
+.price-now { font-size: 30px; color: #F57224; font-weight: 700; display: block; }
+.price-was { color: #9E9E9E; text-decoration: line-through; margin-right: 8px; }
+.discount-badge { color: #212121; }
+.cart-button { padding: 12px 28px; border: 0; border-radius: 4px; background: #F57224; color: #FFFFFF; font-size: 16px; }
+.product-list { max-width: 960px; margin: 20px auto; background: #FFFFFF; padding: 20px; }
+.product-list li { margin: 10px 0; }
