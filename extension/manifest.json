@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Price Pulse",
+  "version": "0.2.0",
+  "description": "Tells you if a store discount is real, and alerts you when a watched product reaches your target price.",
+
+  "permissions": ["storage", "alarms"],
+
+  "host_permissions": [
+    "http://localhost:8080/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.daraz.pk/products/*",
+        "http://localhost:8080/demo-store/*"
+      ],
+      "js": [
+        "adapters/BaseAdapter.js",
+        "adapters/DarazAdapter.js",
+        "adapters/DemoStoreAdapter.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_title": "Price Pulse",
+    "default_popup": "popup.html"
+  }
+}

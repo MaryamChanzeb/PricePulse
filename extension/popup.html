@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Price Pulse</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="pp-header">
+    <span class="pp-logo">PP</span>
+    <h1 class="pp-title">Price Pulse</h1>
+  </header>
+
+  <main>
+    <!-- Only one view is visible at a time (popup.js showView). -->
+
+    <section id="view-loading" class="pp-view">
+      <p class="pp-muted">Connecting&hellip;</p>
+    </section>
+
+    <section id="view-offline" class="pp-view" hidden>
+      <div class="pp-alert pp-alert-offline" role="alert">Price Pulse is offline</div>
+      <p class="pp-muted">The Price Pulse server cannot be reached. Store pages keep working normally.</p>
+      <button type="button" id="btn-retry" class="pp-btn pp-btn-primary">Try again</button>
+    </section>
+
+    <!-- FR-09: nothing is sent to the server until the shopper logs in. -->
+    <section id="view-login" class="pp-view" hidden>
+      <div class="pp-tabs" role="tablist">
+        <button type="button" id="tab-login" class="pp-tab" role="tab" aria-selected="true">Log in</button>
+        <button type="button" id="tab-signup" class="pp-tab" role="tab" aria-selected="false">Sign up</button>
+      </div>
+
+      <form id="form-login" class="pp-form" novalidate>
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" autocomplete="email" required>
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" autocomplete="current-password" required>
+        <label class="pp-check">
+          <input type="checkbox" id="login-show-password"> Show password
+        </label>
+        <button type="submit" class="pp-btn pp-btn-primary">Log in</button>
+      </form>
+
+      <form id="form-signup" class="pp-form" novalidate hidden>
+        <label for="signup-name">Name</label>
+        <input id="signup-name" type="text" autocomplete="name" maxlength="100" required>
+        <label for="signup-email">Email</label>
+        <input id="signup-email" type="email" autocomplete="email" maxlength="255" required>
+        <label for="signup-password">Password</label>
+        <input id="signup-password" type="password" autocomplete="new-password" required>
+        <p class="pp-hint">At least 8 characters with at least one digit.</p>
+        <label class="pp-check">
+          <input type="checkbox" id="signup-show-password"> Show password
+        </label>
+        <button type="submit" class="pp-btn pp-btn-primary">Create account</button>
+      </form>
+    </section>
+
+    <section id="view-account" class="pp-view" hidden>
+      <p class="pp-muted">Logged in as <strong id="account-name"></strong> (<span id="account-email"></span>)</p>
+      <p>Open a product page on a supported store to see its verdict.</p>
+      <button type="button" id="btn-logout" class="pp-btn pp-btn-secondary">Log out</button>
+    </section>
+
+    <p id="popup-error" class="pp-error" role="alert" hidden></p>
+  </main>
+
+  <footer class="pp-footer">
+    <a href="http://localhost:8080/" target="_blank" rel="noopener">Open dashboard</a>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
