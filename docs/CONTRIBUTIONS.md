@@ -16,3 +16,6 @@ A name is added to a row only after that member has committed the work.
 | Z5 | Discount rules, analysis service, product verdict and history endpoints, rule tests | Written with Claude | | | |
 | M3 | Store adapters (Base, Daraz, Demo store) and demo store pages | Written with Claude; Daraz selectors to be verified by Maryam in DevTools | | | |
 | M4 | Content script, verdict badge, OBSERVE message | Written with Claude | | | |
+| Z6 | Watchlist service and endpoints, AlertRule hierarchy, arm and disarm | Written with Claude | | | |
+| Z7 | Notification service, Server-Sent Events stream, unread count, mark read | Written with Claude | | | |
+| M5 | Popup verdict, Watch button, watchlist and alerts tabs, toolbar unread count | Written with Claude | | | |

@@ -302,3 +302,78 @@ git commit -m "Record browser test results for the demo store badges"
 git push -u origin feature/content-badge-maryam
 ```
 Pull request: "Content script and verdict badge (M4)". Reviewer: Zahra.
+
+> 27 Nov 2026: everything up to M4 was committed directly to `main` by Maryam (8 commits, 5b561eb).
+> From here on, commit messages do not carry a co-author line (team decision); docs/CONTRIBUTIONS.md
+> keeps the record of how each slice was written.
+
+### Slice Z6 - watchlist and alert rules (runs: Zahra, reviews: Maryam)
+FR-24 to FR-29; SDS 3.1 (Figure 4), 4.3.
+
+```powershell
+git switch main; git pull
+git switch -c feature/watchlist-alerts-zahra
+git config --local user.name "Zahra Latif"; git config --local user.email "<Zahra's GitHub email>"
+
+git add server/src/main/java/com/pricepulse/rules/AlertRule.java server/src/main/java/com/pricepulse/rules/TargetPriceAlertRule.java server/src/main/java/com/pricepulse/rules/PercentageDropAlertRule.java server/src/main/java/com/pricepulse/rules/RuleConfig.java server/src/main/resources/application.properties server/src/test/java/com/pricepulse/TestRules.java server/src/test/java/com/pricepulse/rules/AlertRuleTest.java
+git commit -m "Add AlertRule with target price and percentage drop subclasses"
+
+git add server/src/main/java/com/pricepulse/exception/DuplicateWatchException.java server/src/main/java/com/pricepulse/exception/WatchLimitExceededException.java server/src/main/java/com/pricepulse/dto/WatchRequest.java server/src/main/java/com/pricepulse/dto/TargetRequest.java server/src/main/java/com/pricepulse/dto/WatchItemResponse.java
+git commit -m "Add watchlist request and response records and limit exceptions"
+
+git add server/src/main/java/com/pricepulse/dto/NotificationResponse.java server/src/main/java/com/pricepulse/service/NotificationService.java server/src/test/java/com/pricepulse/service/NotificationServiceTest.java
+git commit -m "Add NotificationService with a map of live streams per user"
+
+git add server/src/main/java/com/pricepulse/service/WatchlistService.java server/src/test/java/com/pricepulse/service/WatchlistServiceTest.java
+git commit -m "Add WatchlistService with duplicate and 20 item limit, arm and disarm alerts"
+
+git add server/src/main/java/com/pricepulse/controller/WatchlistController.java server/src/main/java/com/pricepulse/controller/ObservationController.java server/src/test/java/com/pricepulse/controller/ObservationControllerTest.java
+git commit -m "Add watchlist endpoints and check alerts after each accepted price"
+
+git push -u origin feature/watchlist-alerts-zahra
+```
+Pull request: "Watchlist and alert rules (Z6)". Reviewer: Maryam.
+
+### Slice Z7 - notifications and live stream (runs: Zahra, reviews: Maryam)
+FR-28, FR-30 to FR-32; SDS 3.3, 7.
+
+```powershell
+git switch main; git pull
+git switch -c feature/notifications-zahra
+git config --local user.name "Zahra Latif"; git config --local user.email "<Zahra's GitHub email>"
+
+git add server/src/main/java/com/pricepulse/controller/NotificationController.java server/src/main/java/com/pricepulse/config/SecurityConfig.java server/src/main/java/com/pricepulse/PricePulseApplication.java
+git commit -m "Add notification list, unread count, mark read and Server-Sent Events stream"
+
+git add docs
+git commit -m "Record watchlist and live alert test results"
+
+git push -u origin feature/notifications-zahra
+```
+Pull request: "Notifications and live stream (Z7)". Reviewer: Maryam.
+
+Merge Z6 before Z7: NotificationService is committed in Z6 because WatchlistService needs it to compile.
+
+### Slice M5 - popup verdict, watchlist and alerts (runs: Maryam, reviews: Zahra)
+FR-22, FR-24, FR-27, FR-31, FR-32, FR-33 (short version). Needs Z6 and Z7 merged.
+
+```powershell
+git switch main; git pull
+git switch -c feature/popup-watchlist-maryam
+git config --local user.name "Maryam Chanzeb"; git config --local user.email "maryam786034@gmail.com"
+
+git add extension/background.js
+git commit -m "Add watchlist, notification and page verdict messages to the background worker"
+
+git add extension/popup.html extension/popup.css
+git commit -m "Add popup tabs for this page, watchlist and alerts with verdict colours"
+
+git add extension/popup.js
+git commit -m "Show page verdict, Watch button, watchlist and notifications in the popup"
+
+git add docs
+git commit -m "Record popup browser test results and hidden bubble bug B4"
+
+git push -u origin feature/popup-watchlist-maryam
+```
+Pull request: "Popup verdict, watchlist and alerts (M5)". Reviewer: Zahra.
