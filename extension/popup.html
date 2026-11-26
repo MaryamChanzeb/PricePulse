@@ -58,9 +58,49 @@
     </section>
 
     <section id="view-account" class="pp-view" hidden>
-      <p class="pp-muted">Logged in as <strong id="account-name"></strong> (<span id="account-email"></span>)</p>
-      <p>Open a product page on a supported store to see its verdict.</p>
-      <button type="button" id="btn-logout" class="pp-btn pp-btn-secondary">Log out</button>
+      <div class="pp-account-bar">
+        <span class="pp-muted">Logged in as <strong id="account-name"></strong><br><span id="account-email"></span></span>
+        <button type="button" id="btn-logout" class="pp-link-button">Log out</button>
+      </div>
+
+      <div class="pp-tabs" role="tablist">
+        <button type="button" id="tab-page" class="pp-tab" role="tab" aria-selected="true">This page</button>
+        <button type="button" id="tab-watchlist" class="pp-tab" role="tab" aria-selected="false">Watchlist</button>
+        <button type="button" id="tab-alerts" class="pp-tab" role="tab" aria-selected="false">
+          Alerts <span id="alerts-count" class="pp-count" hidden></span>
+        </button>
+      </div>
+
+      <!-- FR-22: the same verdict as the badge on the page -->
+      <div id="panel-page" role="tabpanel">
+        <p id="page-empty" class="pp-muted">Open a product page on a supported store to see its verdict.</p>
+        <div id="page-verdict" hidden>
+          <p id="page-title" class="pp-product"></p>
+          <div id="verdict-box" class="pp-verdict"></div>
+          <p id="verdict-numbers" class="pp-numbers"></p>
+          <p id="verdict-reason" class="pp-muted"></p>
+          <form id="form-watch" class="pp-form" novalidate>
+            <label for="watch-target">Alert me when the price is at or below (Rs)</label>
+            <div class="pp-row">
+              <input id="watch-target" type="number" min="1" step="1" inputmode="numeric" required>
+              <button type="submit" class="pp-btn pp-btn-primary pp-btn-inline">Watch</button>
+            </div>
+          </form>
+          <p id="watch-result" class="pp-success" role="status" hidden></p>
+        </div>
+      </div>
+
+      <!-- FR-33 (short version): the dashboard shows the full watchlist -->
+      <div id="panel-watchlist" role="tabpanel" hidden>
+        <p id="watchlist-summary" class="pp-muted"></p>
+        <ul id="watchlist-items" class="pp-list"></ul>
+      </div>
+
+      <!-- FR-31, FR-32 -->
+      <div id="panel-alerts" role="tabpanel" hidden>
+        <p id="alerts-empty" class="pp-muted" hidden>No notifications yet.</p>
+        <ul id="alert-items" class="pp-list"></ul>
+      </div>
     </section>
 
     <p id="popup-error" class="pp-error" role="alert" hidden></p>

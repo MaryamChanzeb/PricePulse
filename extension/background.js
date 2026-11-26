@@ -122,6 +122,7 @@ async function handleGetSession() {
 
 async function handleLogout() {
   await clearSession();
+  await chrome.action.setBadgeText({ text: '' });
   return success({ loggedIn: false });
 }
 
@@ -164,6 +165,8 @@ async function finishLogin(reply) {
     return failure('invalid', 'Admin accounts use the web dashboard, not the extension.');
   }
   await saveSession({ token: data.token, email: data.email, name: data.name, role: data.role });
+  ensureUnreadAlarm();
+  await refreshUnreadBadge();
   return success({ loggedIn: true, email: data.email, name: data.name, role: data.role });
 }
 
@@ -198,13 +201,125 @@ async function handleObserve(message, sender) {
   return reply;
 }
 
+// ---------- popup data (M5) ----------
+
+function tabKey(tabId) {
+  return 'tab-' + tabId;
+}
+
+// The verdict content.js received for this tab, so the popup can show the same thing (FR-22).
+async function handleGetPageVerdict(message) {
+  if (message.tabId === undefined || message.tabId === null) {
+    return success(null);
+  }
+  const stored = await chrome.storage.session.get(tabKey(message.tabId));
+  return success(stored[tabKey(message.tabId)] || null);
+}
+
+// FR-24: watch the product of the current page with a target price.
+async function handleWatch(message) {
+  const target = Number(message.targetPrice);
+  if (!message.productId) {
+    return failure('invalid', 'Open a product page first.');
+  }
+  if (!Number.isFinite(target) || target <= 0) {
+    return failure('invalid', 'Target price must be greater than zero');
+  }
+  return apiRequest('/watchlist', {
+    method: 'POST', auth: true, body: { productId: message.productId, targetPrice: target }
+  });
+}
+
+async function handleGetWatchlist() {
+  return apiRequest('/watchlist', { auth: true });
+}
+
+async function handleRemoveWatch(message) {
+  return apiRequest('/watchlist/' + encodeURIComponent(message.itemId), { method: 'DELETE', auth: true });
+}
+
+async function handleGetNotifications() {
+  return apiRequest('/notifications', { auth: true });
+}
+
+async function handleMarkRead(message) {
+  const reply = await apiRequest('/notifications/' + encodeURIComponent(message.notificationId) + '/read',
+    { method: 'PUT', auth: true });
+  await refreshUnreadBadge();
+  return reply;
+}
+
+// ---------- unread count on the toolbar icon (FR-31) ----------
+
+const UNREAD_ALARM = 'price-pulse-unread';
+
+async function refreshUnreadBadge() {
+  const session = await readSession();
+  if (!session) {
+    await chrome.action.setBadgeText({ text: '' });
+    return success({ count: 0 });
+  }
+  const reply = await apiRequest('/notifications/unread-count', { auth: true });
+  if (reply.ok) {
+    const count = Number(reply.data && reply.data.count) || 0;
+    await chrome.action.setBadgeBackgroundColor({ color: '#F59E0B' });
+    await chrome.action.setBadgeText({ text: count > 0 ? (count > 99 ? '99+' : String(count)) : '' });
+    return success({ count: count });
+  }
+  if (reply.error === 'auth') {
+    await chrome.action.setBadgeText({ text: '' });
+  }
+  return reply; // offline: keep the last number
+}
+
+// The service worker is stopped when idle, so a live stream cannot stay open here (SDS 7).
+// Instead an alarm wakes it once a minute to ask for the unread count.
+function ensureUnreadAlarm() {
+  chrome.alarms.create(UNREAD_ALARM, { periodInMinutes: 1 });
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  ensureUnreadAlarm();
+  refreshUnreadBadge();
+});
+chrome.runtime.onStartup.addListener(() => {
+  ensureUnreadAlarm();
+  refreshUnreadBadge();
+});
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === UNREAD_ALARM) {
+    refreshUnreadBadge();
+  }
+});
+
+// Forget a tab's verdict when it loads another page or closes, so the popup never shows an old verdict.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.status === 'loading') {
+    chrome.storage.session.remove(tabKey(tabId));
+  }
+});
+chrome.tabs.onRemoved.addListener((tabId) => {
+  chrome.storage.session.remove(tabKey(tabId));
+});
+
+async function handleRefreshBadge() {
+  return refreshUnreadBadge();
+}
+
 const HANDLERS = {
   PING: handlePing,
   GET_SESSION: handleGetSession,
   LOGIN: handleLogin,
   SIGNUP: handleSignup,
   LOGOUT: handleLogout,
-  OBSERVE: handleObserve
+  OBSERVE: handleObserve,
+  GET_PAGE_VERDICT: handleGetPageVerdict,
+  WATCH: handleWatch,
+  GET_WATCHLIST: handleGetWatchlist,
+  REMOVE_WATCH: handleRemoveWatch,
+  GET_NOTIFICATIONS: handleGetNotifications,
+  MARK_READ: handleMarkRead,
+  REFRESH_BADGE: handleRefreshBadge
 };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
